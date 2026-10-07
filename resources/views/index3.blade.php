@@ -400,8 +400,14 @@ h1{font-size:1.15rem}
           <div class="sf"><label>Nama</label><p>{{ $result['data']['nama'] ?? '-' }}</p></div>
           <div class="sf"><label>Unit Kelas Kelompok</label><p>{{ $unitKelasKelompok }}</p></div>
           <div class="sf"><label>Angkatan</label><p>{{ ($academic_year ?? 'all') === 'all' ? 'Semua' : $academic_year }}</p></div>
-          <div class="sf"><label>SALDO VA 797789 Close Payment</label><p>Rp {{ number_format($result['data']['saldo'] ?? 0, 0, ',', '.') }}</p></div>
-          <div class="sf"><label>SALDO VA 797790 Open Payment</label><p>{{ $result['data']['va_number'] ?? '-' }}</p></div>
+          @php
+            $nocustVa = $result['data']['no_cust'] ?? ($result['data']['va_number'] ?? '');
+            $vaClose89 = $result['data']['va_close_payment'] ?? \App\Http\Controllers\TagihanController::formatClosePaymentVa($nocustVa);
+            $vaOpen90 = $result['data']['va_number'] ?? \App\Http\Controllers\TagihanController::formatNova($nocustVa);
+          @endphp
+          <div class="sf"><label>SALDO VA 797789 Close Payment</label><p>{{ $vaClose89 }}</p></div>
+          <div class="sf"><label>SALDO VA 797790 Open Payment</label><p>{{ $vaOpen90 }}</p></div>
+          <div class="sf"><label>Saldo Open Payment</label><p>Rp {{ number_format($result['data']['saldo'] ?? 0, 0, ',', '.') }}</p></div>
         </div>
 
         <div class="divider"></div>
@@ -451,7 +457,10 @@ h1{font-size:1.15rem}
                 $expLabel = (!empty($expRaw) && !str_starts_with((string) $expRaw, '0000-00-00'))
                   ? \Carbon\Carbon::parse($expRaw)->format('Y-m-d')
                   : '-';
-                $noVaTagihan = $tagih['NOVA'] ?? $tagih['nova'] ?? $tagih['no_va'] ?? $result['data']['va_number'] ?? '-';
+                // Tidak cicil → VA 89 (Close), bisa cicil → VA 90 (Open)
+                $noVaTagihan = $bolehCicil
+                  ? ($vaOpen90 ?? \App\Http\Controllers\TagihanController::formatNova($result['data']['no_cust'] ?? ''))
+                  : ($vaClose89 ?? \App\Http\Controllers\TagihanController::formatClosePaymentVa($result['data']['no_cust'] ?? ''));
               @endphp
               <tr data-index="{{ $i }}">
                 @unless($viewOnly)
@@ -502,7 +511,9 @@ h1{font-size:1.15rem}
             $expLabel = (!empty($expRaw) && !str_starts_with((string) $expRaw, '0000-00-00'))
               ? \Carbon\Carbon::parse($expRaw)->format('Y-m-d')
               : '-';
-            $noVaTagihan = $tagih['NOVA'] ?? $tagih['nova'] ?? $tagih['no_va'] ?? $result['data']['va_number'] ?? '-';
+            $noVaTagihan = $bolehCicil
+              ? ($vaOpen90 ?? \App\Http\Controllers\TagihanController::formatNova($result['data']['no_cust'] ?? ''))
+              : ($vaClose89 ?? \App\Http\Controllers\TagihanController::formatClosePaymentVa($result['data']['no_cust'] ?? ''));
           @endphp
           <article class="bill-card" data-index="{{ $i }}">
             <div class="bill-card-top">

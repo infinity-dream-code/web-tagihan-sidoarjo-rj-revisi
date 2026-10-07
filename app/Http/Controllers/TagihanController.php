@@ -35,14 +35,24 @@ class TagihanController extends Controller
 
     public static function formatNova(?string $nocust): string
     {
+        return self::formatVaWithPrefix($nocust, '797790');
+    }
+
+    /** Close Payment VA (797789) */
+    public static function formatClosePaymentVa(?string $nocust): string
+    {
+        return self::formatVaWithPrefix($nocust, '797789');
+    }
+
+    public static function formatVaWithPrefix(?string $nocust, string $prefix): string
+    {
         $n = self::normalizeVa($nocust);
 
         if ($n === '' || $n === '-') {
             return '-';
         }
 
-        // Open Payment VA
-        return '797790'.$n;
+        return $prefix.$n;
     }
 
     public function cek(Request $request)
@@ -192,6 +202,7 @@ class TagihanController extends Controller
         if (!empty($result['data'])) {
             $nocust = $result['data']['no_cust'] ?? $result['data']['va_number'] ?? $fallback;
             $result['data']['va_number'] = self::formatNova($nocust);
+            $result['data']['va_close_payment'] = self::formatClosePaymentVa($nocust);
             $result['data']['unit'] = $result['data']['unit'] ?? $result['data']['jenjang'] ?? '';
             $result['data']['kelompok'] = $result['data']['kelompok'] ?? $result['data']['jurusan'] ?? '';
             if (empty($result['data']['unit_kelas_kelompok']) || $result['data']['unit_kelas_kelompok'] === '-') {

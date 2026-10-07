@@ -29,6 +29,7 @@ class MultiAccountController extends Controller
         if (!empty($result['data'])) {
             $nocust = $result['data']['no_cust'] ?? $result['data']['va_number'] ?? $fallback;
             $result['data']['va_number'] = TagihanController::formatNova($nocust);
+            $result['data']['va_close_payment'] = TagihanController::formatClosePaymentVa($nocust);
             $result['data']['unit'] = $result['data']['unit'] ?? $result['data']['jenjang'] ?? '';
             $result['data']['kelompok'] = $result['data']['kelompok'] ?? $result['data']['jurusan'] ?? '';
             if (empty($result['data']['unit_kelas_kelompok']) || $result['data']['unit_kelas_kelompok'] === '-') {
