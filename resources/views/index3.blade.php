@@ -110,7 +110,7 @@ html.dark .submit-btn{color:#052e16}
 .divider{border:none;border-top:1px solid var(--border);margin:1.35rem 0}
 .student-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.15rem}
 .sf{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 12px}
-.sf label{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.sf label{display:block;font-size:10px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;line-height:1.3}
 .sf p{font-size:14px;font-weight:650;color:var(--text);margin:0;word-break:break-word;line-height:1.35}
 .tbl-bar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;flex-wrap:wrap;gap:.65rem}
 .tbl-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.35}
@@ -385,13 +385,23 @@ h1{font-size:1.15rem}
             <button type="button" class="btn-showall" id="btnMultiAkun" onclick="openMultiAkunModal()">Multi akun</button>
           </div>
         </div>
+        @php
+          $unitKelasKelompok = $result['data']['unit_kelas_kelompok'] ?? null;
+          if (!$unitKelasKelompok || $unitKelasKelompok === '-') {
+            $ukParts = array_filter([
+              trim((string) ($result['data']['unit'] ?? $result['data']['jenjang'] ?? '')),
+              trim((string) ($result['data']['kelas'] ?? '')),
+              trim((string) ($result['data']['kelompok'] ?? $result['data']['jurusan'] ?? '')),
+            ], static fn ($v) => $v !== '');
+            $unitKelasKelompok = $ukParts ? implode(' ', $ukParts) : '-';
+          }
+        @endphp
         <div class="student-grid">
           <div class="sf"><label>Nama</label><p>{{ $result['data']['nama'] ?? '-' }}</p></div>
-          <div class="sf"><label>Kelas</label><p>{{ $result['data']['kelas'] ?? '-' }}</p></div>
+          <div class="sf"><label>Unit Kelas Kelompok</label><p>{{ $unitKelasKelompok }}</p></div>
           <div class="sf"><label>Angkatan</label><p>{{ ($academic_year ?? 'all') === 'all' ? 'Semua' : $academic_year }}</p></div>
-          <div class="sf"><label>Saldo VA</label><p>Rp {{ number_format($result['data']['saldo'] ?? 0, 0, ',', '.') }}</p></div>
-          <div class="sf"><label>NOVA</label><p>{{ $result['data']['va_number'] ?? '-' }}</p></div>
-          <div class="sf"><label>Jenjang</label><p>{{ $result['data']['jenjang'] ?? '-' }}</p></div>
+          <div class="sf"><label>SALDO VA 797789 Close Payment</label><p>Rp {{ number_format($result['data']['saldo'] ?? 0, 0, ',', '.') }}</p></div>
+          <div class="sf"><label>SALDO VA 797790 Open Payment</label><p>{{ $result['data']['va_number'] ?? '-' }}</p></div>
         </div>
 
         <div class="divider"></div>
@@ -422,8 +432,9 @@ h1{font-size:1.15rem}
                 <th>Nominal</th>
                 <th>Sisa tagihan</th>
                 <th>Sudah dibayar</th>
+                <th>NO VA</th>
+                <th>CICIL</th>
                 @unless($viewOnly)
-                <th>Dapat dicicil</th>
                 <th>Bayar</th>
                 @endunless
                 <th>Exp Date</th>
@@ -440,6 +451,7 @@ h1{font-size:1.15rem}
                 $expLabel = (!empty($expRaw) && !str_starts_with((string) $expRaw, '0000-00-00'))
                   ? \Carbon\Carbon::parse($expRaw)->format('Y-m-d')
                   : '-';
+                $noVaTagihan = $tagih['NOVA'] ?? $tagih['nova'] ?? $tagih['no_va'] ?? $result['data']['va_number'] ?? '-';
               @endphp
               <tr data-index="{{ $i }}">
                 @unless($viewOnly)
@@ -453,7 +465,7 @@ h1{font-size:1.15rem}
                 <td>Rp {{ number_format($totalTagih, 0, ',', '.') }}</td>
                 <td>Rp {{ number_format($sisaTagih, 0, ',', '.') }}</td>
                 <td>Rp {{ number_format($sudahBayar, 0, ',', '.') }}</td>
-                @unless($viewOnly)
+                <td>{{ $noVaTagihan }}</td>
                 <td>
                   @if($bolehCicil)
                     <span class="badge badge-cicil">Ya</span>
@@ -461,6 +473,7 @@ h1{font-size:1.15rem}
                     <span class="badge badge-no-cicil">Tidak</span>
                   @endif
                 </td>
+                @unless($viewOnly)
                 <td>
                   <input type="number" class="pay-input bayar-input" data-index="{{ $i }}" min="1" max="{{ $sisaTagih }}" value="0" disabled inputmode="numeric" aria-label="Nominal bayar">
                 </td>
@@ -468,7 +481,7 @@ h1{font-size:1.15rem}
                 <td>{{ $expLabel }}</td>
               </tr>
               @empty
-              <tr><td colspan="{{ $viewOnly ? 7 : 10 }}" class="empty-note">Tidak ada data tersedia</td></tr>
+              <tr><td colspan="{{ $viewOnly ? 9 : 11 }}" class="empty-note">Tidak ada data tersedia</td></tr>
               @endforelse
             </tbody>
           </table>
@@ -489,6 +502,7 @@ h1{font-size:1.15rem}
             $expLabel = (!empty($expRaw) && !str_starts_with((string) $expRaw, '0000-00-00'))
               ? \Carbon\Carbon::parse($expRaw)->format('Y-m-d')
               : '-';
+            $noVaTagihan = $tagih['NOVA'] ?? $tagih['nova'] ?? $tagih['no_va'] ?? $result['data']['va_number'] ?? '-';
           @endphp
           <article class="bill-card" data-index="{{ $i }}">
             <div class="bill-card-top">
@@ -498,17 +512,18 @@ h1{font-size:1.15rem}
               <label class="bill-check">
                 <input type="checkbox" class="chk tagihan-checkbox" value="{{ $tagih['AA'] ?? '' }}" data-index="{{ $i }}" {{ $sisaTagih <= 0 ? 'disabled' : '' }}> Pilih
               </label>
-              @if($bolehCicil)
-                <span class="badge badge-cicil">Bisa dicicil</span>
-              @else
-                <span class="badge badge-no-cicil">Tidak dicicil</span>
               @endif
+              @if($bolehCicil)
+                <span class="badge badge-cicil">CICIL: Ya</span>
+              @else
+                <span class="badge badge-no-cicil">CICIL: Tidak</span>
               @endif
             </div>
             <h3>{{ ucwords(str_replace('_', ' ', strtolower($tagih['nama_tagihan']))) }}</h3>
             <p class="bill-amount">Rp {{ number_format($totalTagih, 0, ',', '.') }}</p>
             <div class="bill-meta">
               <span>Periode {{ $tagih['periode'] ?: '-' }}</span>
+              <span>NO VA {{ $noVaTagihan }}</span>
               <span>Sisa tagihan Rp {{ number_format($sisaTagih, 0, ',', '.') }}</span>
               <span>Sudah dibayar Rp {{ number_format($sudahBayar, 0, ',', '.') }}</span>
               <span>Exp Date {{ $expLabel }}</span>
@@ -690,7 +705,7 @@ h1{font-size:1.15rem}
       'no_cust' => $activeNoCust,
       'va_display' => $va ?? ($result['data']['va_number'] ?? $activeNoCust),
       'nama' => $result['data']['nama'] ?? '-',
-      'kelas' => $result['data']['kelas'] ?? '-',
+      'kelas' => $result['data']['unit_kelas_kelompok'] ?? ($result['data']['kelas'] ?? '-'),
       'jenjang' => $result['data']['jenjang'] ?? '-',
       'is_active' => true,
     ]]);
@@ -1051,6 +1066,9 @@ const siswaBayar = {
   id: @json($result['data']['id'] ?? null),
   nama: @json($result['data']['nama'] ?? ''),
   kelas: @json($result['data']['kelas'] ?? ''),
+  unit: @json($result['data']['unit'] ?? $result['data']['jenjang'] ?? ''),
+  kelompok: @json($result['data']['kelompok'] ?? $result['data']['jurusan'] ?? ''),
+  unit_kelas_kelompok: @json($result['data']['unit_kelas_kelompok'] ?? ($unitKelasKelompok ?? '')),
   no_cust: @json($result['data']['no_cust'] ?? ''),
   num2nd: @json($result['data']['num2nd'] ?? ''),
   va_number: @json($result['data']['va_number'] ?? ''),
@@ -1318,9 +1336,9 @@ function formatRp(n) {
 function formatNovaDisplay(va) {
   let n = String(va ?? '').replace(/\s+/g, '');
   if (!n || n === '-') return '-';
-  n = n.replace(/^(757777|797766|751000)/, '');
+  n = n.replace(/^(797790|797789|757777|797766|751000)/, '');
   n = n.replace(/^0+/, '') || n;
-  return n ? ('757777' + n) : '-';
+  return n ? ('797790' + n) : '-';
 }
 
 function esc(s) {
@@ -1524,7 +1542,7 @@ function showPaymentModal() {
   document.getElementById('paymentBody').innerHTML = `
     <div class="pay-info">
       <div><span class="pi-lbl">Nama</span><div class="pi-val">${esc(siswaBayar.nama) || '-'}</div></div>
-      <div><span class="pi-lbl">Kelas</span><div class="pi-val">${esc(siswaBayar.kelas) || '-'}</div></div>
+      <div><span class="pi-lbl">Unit Kelas Kelompok</span><div class="pi-val">${esc(siswaBayar.unit_kelas_kelompok || [siswaBayar.unit, siswaBayar.kelas, siswaBayar.kelompok].filter(Boolean).join(' ')) || '-'}</div></div>
       <div><span class="pi-lbl">NIS</span><div class="pi-val">${esc(siswaBayar.no_cust || siswaBayar.num2nd) || '-'}</div></div>
       <div><span class="pi-lbl">Nomor VA</span><div class="pi-val">${esc(formatNovaDisplay(siswaBayar.va_number || siswaBayar.no_cust)) || '-'}</div></div>
       <div><span class="pi-lbl">Exp Date VA</span><div class="pi-val">${esc(formatExpDate(minExp))}</div></div>
@@ -1644,7 +1662,7 @@ async function prosesPembayaran() {
           <div class="va-number" id="vaNumberText">${esc(va)}</div>
           <button type="button" class="btn-copy" onclick="copyVa()">Salin nomor VA</button>
           <p class="va-meta">Total: <b>${formatRp(total)}</b></p>
-          <p class="va-help">Bayar ke nomor VA di atas (kode bank 757777).</p>
+          <p class="va-help">Bayar ke nomor VA di atas (kode bank 797790 Open Payment).</p>
         </div>`;
       const actions = document.getElementById('payActions');
       if (actions) {

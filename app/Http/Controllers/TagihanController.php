@@ -24,7 +24,7 @@ class TagihanController extends Controller
     {
         $va = preg_replace('/\s+/', '', (string) $va);
 
-        if (preg_match('/^(757777|797766|751000)(\d+)$/', $va, $m)) {
+        if (preg_match('/^(797790|797789|757777|797766|751000)(\d+)$/', $va, $m)) {
             $va = $m[2];
         }
 
@@ -41,7 +41,8 @@ class TagihanController extends Controller
             return '-';
         }
 
-        return '757777'.$n;
+        // Open Payment VA
+        return '797790'.$n;
     }
 
     public function cek(Request $request)
@@ -191,6 +192,16 @@ class TagihanController extends Controller
         if (!empty($result['data'])) {
             $nocust = $result['data']['no_cust'] ?? $result['data']['va_number'] ?? $fallback;
             $result['data']['va_number'] = self::formatNova($nocust);
+            $result['data']['unit'] = $result['data']['unit'] ?? $result['data']['jenjang'] ?? '';
+            $result['data']['kelompok'] = $result['data']['kelompok'] ?? $result['data']['jurusan'] ?? '';
+            if (empty($result['data']['unit_kelas_kelompok']) || $result['data']['unit_kelas_kelompok'] === '-') {
+                $parts = array_filter([
+                    trim((string) ($result['data']['unit'] ?? '')),
+                    trim((string) ($result['data']['kelas'] ?? '')),
+                    trim((string) ($result['data']['kelompok'] ?? '')),
+                ], static fn ($v) => $v !== '');
+                $result['data']['unit_kelas_kelompok'] = $parts ? implode(' ', $parts) : '-';
+            }
             $result = self::normalizeBillAmounts($result);
         }
 

@@ -29,6 +29,16 @@ class MultiAccountController extends Controller
         if (!empty($result['data'])) {
             $nocust = $result['data']['no_cust'] ?? $result['data']['va_number'] ?? $fallback;
             $result['data']['va_number'] = TagihanController::formatNova($nocust);
+            $result['data']['unit'] = $result['data']['unit'] ?? $result['data']['jenjang'] ?? '';
+            $result['data']['kelompok'] = $result['data']['kelompok'] ?? $result['data']['jurusan'] ?? '';
+            if (empty($result['data']['unit_kelas_kelompok']) || $result['data']['unit_kelas_kelompok'] === '-') {
+                $parts = array_filter([
+                    trim((string) ($result['data']['unit'] ?? '')),
+                    trim((string) ($result['data']['kelas'] ?? '')),
+                    trim((string) ($result['data']['kelompok'] ?? '')),
+                ], static fn ($v) => $v !== '');
+                $result['data']['unit_kelas_kelompok'] = $parts ? implode(' ', $parts) : '-';
+            }
             $result = TagihanController::normalizeBillAmounts($result);
         }
 

@@ -268,7 +268,7 @@ class Tagihan
 
     private function stripVa($va_number)
     {
-        foreach (['751000', '797766'] as $prefix) {
+        foreach (['797790', '797789', '757777', '751000', '797766'] as $prefix) {
             if (strpos((string) $va_number, $prefix) === 0) {
                 return substr($va_number, strlen($prefix));
             }
@@ -300,7 +300,18 @@ class Tagihan
     ";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':nocust' => $num2nd]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $siswa = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        if ($siswa) {
+            $siswa['unit'] = $siswa['jenjang'] ?? '';
+            $siswa['kelompok'] = $siswa['jurusan'] ?? '';
+            $parts = array_filter([
+                trim((string) $siswa['unit']),
+                trim((string) ($siswa['kelas'] ?? '')),
+                trim((string) $siswa['kelompok']),
+            ], static fn ($v) => $v !== '');
+            $siswa['unit_kelas_kelompok'] = $parts ? implode(' ', $parts) : '-';
+        }
+        return $siswa;
     }
 
     private function attachTagihan(array $siswa, $va_number, $tahun_akademik = null)
