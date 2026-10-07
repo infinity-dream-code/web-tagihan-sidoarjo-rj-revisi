@@ -381,6 +381,7 @@ class Tagihan
         }
 
         $custid = $siswa['id'];
+        $tagihanAktif = $this->attachAktifTranDetails($custid, $tagihanAktif);
         $lunasItems = $this->attachLunasDetails($custid, $lunasItems, $num2nd);
 
         $siswa['tahun_dipilih'] = $tahun_akademik ?: 'Semua Tahun Akademik';
@@ -438,6 +439,23 @@ class Tagihan
                 $item['BILLCD'] ?? null,
                 $item['AA'] ?? null,
                 $item['periode'] ?? null
+            );
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    /** Detail transaksi cicilan/pembayaran parsial dari scctran untuk tagihan aktif. */
+    private function attachAktifTranDetails($custid, array $items)
+    {
+        foreach ($items as &$item) {
+            $item['detail'] = $this->fetchLunasTranDetails(
+                $item['CUSTID'] ?? $custid,
+                $item['AA'] ?? null,
+                $item['nama_tagihan'] ?? null,
+                $item['TRANSNO'] ?? null,
+                $item['BILLCD'] ?? null
             );
         }
         unset($item);

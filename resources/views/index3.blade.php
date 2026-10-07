@@ -444,6 +444,7 @@ h1{font-size:1.15rem}
                 <th>Bayar</th>
                 @endunless
                 <th>Exp Date</th>
+                <th>Detail</th>
               </tr>
             </thead>
             <tbody id="tagihanTableBody">
@@ -488,9 +489,10 @@ h1{font-size:1.15rem}
                 </td>
                 @endunless
                 <td>{{ $expLabel }}</td>
+                <td><button type="button" class="btn-detail" onclick="showAktifDetail({{ $i }})">Lihat</button></td>
               </tr>
               @empty
-              <tr><td colspan="{{ $viewOnly ? 9 : 11 }}" class="empty-note">Tidak ada data tersedia</td></tr>
+              <tr><td colspan="{{ $viewOnly ? 10 : 12 }}" class="empty-note">Tidak ada data tersedia</td></tr>
               @endforelse
             </tbody>
           </table>
@@ -529,6 +531,7 @@ h1{font-size:1.15rem}
               @else
                 <span class="badge badge-no-cicil">CICIL: Tidak</span>
               @endif
+              <button type="button" class="btn-detail" onclick="showAktifDetail({{ $i }})">Detail</button>
             </div>
             <h3>{{ ucwords(str_replace('_', ' ', strtolower($tagih['nama_tagihan']))) }}</h3>
             <p class="bill-amount">Rp {{ number_format($totalTagih, 0, ',', '.') }}</p>
@@ -1001,7 +1004,16 @@ function showLunasDetail(index) {
   showDetailModal(tagihanLunas[index] || {});
 }
 
-function showDetailModal(tagihan) {
+function showAktifDetail(index) {
+  const tahunRow = document.getElementById('mTahunRow');
+  if (tahunRow) tahunRow.hidden = true;
+  showDetailModal(tagihanAktif[index] || {}, {
+    forceTran: true,
+    emptyMsg: 'Belum ada transaksi'
+  });
+}
+
+function showDetailModal(tagihan, opts = {}) {
   document.getElementById('mNama').textContent = tagihan.nama_tagihan ? tagihan.nama_tagihan.toLowerCase().replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) : '-';
   document.getElementById('mTahun').textContent = tagihan.tahun_akademik_tagihan || '-';
   const periodeEl = document.getElementById('mPeriode');
@@ -1011,7 +1023,7 @@ function showDetailModal(tagihan) {
   const expEl = document.getElementById('mExpDate');
   if (expEl) expEl.textContent = formatExpDate(expDateOf(tagihan));
   let details = Array.isArray(tagihan.detail) ? tagihan.detail.slice() : [];
-  if (!details.length && (tagihan.PAIDDT || tagihan.PAIDST === '1' || tagihan.paidst === '1')) {
+  if (!details.length && (tagihan.PAIDDT || tagihan.PAIDST === '1' || tagihan.paidst === '1') && !opts.forceTran) {
     details = [{
       sumber: 'tran',
       trxdate: tagihan.PAIDDT || tagihan.paiddt || '-',
@@ -1021,7 +1033,8 @@ function showDetailModal(tagihan) {
       nominal_detail: tagihan.total_tagihan || tagihan.sudah_dibayar || 0
     }];
   }
-  const isTran = details.some(d => d.sumber === 'tran' || d.trxdate || d.TRXDATE);
+  const isTran = !!opts.forceTran || details.some(d => d.sumber === 'tran' || d.trxdate || d.TRXDATE);
+  const emptyMsg = opts.emptyMsg || 'Tidak ada rincian';
   const th = 'padding:9px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)';
   const td = 'padding:9px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)';
   let t = '<table style="width:100%;border-collapse:collapse;margin-top:.75rem"><thead><tr style="background:var(--surface2)">';
@@ -1037,7 +1050,7 @@ function showDetailModal(tagihan) {
         </tr>`;
       });
     } else {
-      t += `<tr><td colspan="4" style="padding:1.5rem;text-align:center;color:var(--text3);font-size:13px">Tidak ada rincian</td></tr>`;
+      t += `<tr><td colspan="4" style="padding:1.5rem;text-align:center;color:var(--text3);font-size:13px">${esc(emptyMsg)}</td></tr>`;
     }
   } else {
     t += `<th style="${th}">Komponen</th><th style="${th};text-align:right">Nominal</th></tr></thead><tbody>`;
@@ -1046,7 +1059,7 @@ function showDetailModal(tagihan) {
         t += `<tr><td style="${td}">${esc(d.akun_detail||'-')}</td><td style="${td};text-align:right;font-weight:650">Rp ${parseInt(d.nominal_detail||0).toLocaleString('id-ID')}</td></tr>`;
       });
     } else {
-      t += `<tr><td colspan="2" style="padding:1.5rem;text-align:center;color:var(--text3);font-size:13px">Tidak ada rincian</td></tr>`;
+      t += `<tr><td colspan="2" style="padding:1.5rem;text-align:center;color:var(--text3);font-size:13px">${esc(emptyMsg)}</td></tr>`;
     }
   }
   t += '</tbody></table>';
