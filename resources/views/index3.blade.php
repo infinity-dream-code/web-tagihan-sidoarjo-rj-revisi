@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Cek Tagihan | Sidoarjo Raudhatul Jannah</title>
+<title>Cek Tagihan | Sidoarjo Raudlatul Jannah</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="description" content="Cek tagihan siswa Sidoarjo Raudhatul Jannah">
+<meta name="description" content="Cek tagihan siswa Sidoarjo Raudlatul Jannah">
 <meta name="theme-color" content="#14532d">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -288,9 +288,9 @@ h1{font-size:1.15rem}
 <div class="wrap">
   <div class="topbar">
     <div class="brand-wrap">
-      <img src="{{ asset('icon-jannah.jpeg') }}" alt="Sidoarjo Raudhatul Jannah" class="brand-logo">
+      <img src="{{ asset('icon-jannah.jpeg') }}" alt="Sidoarjo Raudlatul Jannah" class="brand-logo">
       <div>
-        <div class="brand">Sidoarjo Raudhatul Jannah</div>
+        <div class="brand">Sidoarjo Raudlatul Jannah</div>
         <h1>Cek tagihan</h1>
       </div>
     </div>
@@ -642,7 +642,7 @@ h1{font-size:1.15rem}
     @endif
   @endif
 
-  <div class="footer">© {{ date('Y') }} Sidoarjo Raudhatul Jannah. All rights reserved.</div>
+  <div class="footer">© {{ date('Y') }} Sidoarjo Raudlatul Jannah. All rights reserved.</div>
 </div>
 
 <div id="detailModal" class="modal-bg">

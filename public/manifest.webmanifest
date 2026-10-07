@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Cek & Bayar Tagihan - Sidoarjo Raudhatul Jannah",
+  "name": "Cek & Bayar Tagihan - Sidoarjo Raudlatul Jannah",
   "short_name": "Tagihan RJ",
-  "description": "Cek dan bayar tagihan siswa Sidoarjo Raudhatul Jannah",
+  "description": "Cek dan bayar tagihan siswa Sidoarjo Raudlatul Jannah",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
