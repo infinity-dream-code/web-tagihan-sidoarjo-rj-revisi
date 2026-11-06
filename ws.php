@@ -371,13 +371,24 @@ class Tagihan
         $aktifItems = $this->groupData($belumLunas);
         $lunasItems = $this->groupData($lunas);
 
+        $today = date('Y-m-d');
         $tagihanAktif = [];
         foreach ($aktifItems as $item) {
             if ((int) $item['sisa_tagihan'] <= 0) {
                 $lunasItems[] = $item;
-            } else {
-                $tagihanAktif[] = $item;
+                continue;
             }
+
+            // Sembunyikan tagihan aktif yang sudah lewat ExpDate (exp tgl 5, cek tgl 6 → skip)
+            $expRaw = $item['ExpDate'] ?? null;
+            if ($expRaw !== null && $expRaw !== '' && strpos((string) $expRaw, '0000-00-00') !== 0) {
+                $expDay = substr((string) $expRaw, 0, 10);
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $expDay) && $expDay < $today) {
+                    continue;
+                }
+            }
+
+            $tagihanAktif[] = $item;
         }
 
         $custid = $siswa['id'];

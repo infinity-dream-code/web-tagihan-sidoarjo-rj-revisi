@@ -41,6 +41,7 @@ class MultiAccountController extends Controller
                 $result['data']['unit_kelas_kelompok'] = $parts ? implode(' ', $parts) : '-';
             }
             $result = TagihanController::normalizeBillAmounts($result);
+            $result = TagihanController::filterExpiredActiveBills($result);
         }
 
         return $result;

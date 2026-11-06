@@ -214,7 +214,43 @@ class TagihanController extends Controller
                 $result['data']['unit_kelas_kelompok'] = $parts ? implode(' ', $parts) : '-';
             }
             $result = self::normalizeBillAmounts($result);
+            $result = self::filterExpiredActiveBills($result);
         }
+
+        return $result;
+    }
+
+    /**
+     * Sembunyikan tagihan aktif yang ExpDate-nya sudah lewat hari ini.
+     * Exp tgl 5, cek tgl 6 → tidak ditampilkan. Exp hari ini masih ditampilkan.
+     */
+    public static function filterExpiredActiveBills(array $result): array
+    {
+        if (empty($result['data']['tagihan']) || !is_array($result['data']['tagihan'])) {
+            return $result;
+        }
+
+        $today = now()->startOfDay();
+
+        $result['data']['tagihan'] = array_values(array_filter(
+            $result['data']['tagihan'],
+            static function ($item) use ($today) {
+                if (!is_array($item)) {
+                    return false;
+                }
+
+                $expRaw = $item['ExpDate'] ?? $item['expdate'] ?? $item['exp_date'] ?? null;
+                if ($expRaw === null || $expRaw === '' || str_starts_with((string) $expRaw, '0000-00-00')) {
+                    return true;
+                }
+
+                try {
+                    return \Carbon\Carbon::parse($expRaw)->startOfDay()->gte($today);
+                } catch (\Throwable) {
+                    return true;
+                }
+            }
+        ));
 
         return $result;
     }
