@@ -591,7 +591,6 @@ h1{font-size:1.15rem}
             <thead>
               <tr>
                 <th>No</th>
-                <th>Urutan</th>
                 <th>Nama tagihan</th>
                 <th>Periode</th>
                 <th>Nominal</th>
@@ -603,7 +602,6 @@ h1{font-size:1.15rem}
               @forelse($result['data']['tagihan_lunas'] ?? [] as $i => $tagih)
               <tr data-index="{{ $i }}">
                 <td>{{ $i+1 }}</td>
-                <td>{{ $tagih['FURUTAN'] ?? '-' }}</td>
                 <td>{{ ucwords(str_replace('_', ' ', strtolower($tagih['nama_tagihan']))) }}</td>
                 <td>{{ $tagih['periode'] ?: '-' }}</td>
                 <td>Rp {{ number_format($tagih['total_tagihan'], 0, ',', '.') }}</td>
@@ -611,7 +609,7 @@ h1{font-size:1.15rem}
                 <td><button type="button" class="btn-detail" onclick="showLunasDetail({{ $i }})">Lihat</button></td>
               </tr>
               @empty
-              <tr><td colspan="7" class="empty-note">Tidak ada tagihan lunas</td></tr>
+              <tr><td colspan="6" class="empty-note">Tidak ada tagihan lunas</td></tr>
               @endforelse
             </tbody>
           </table>
@@ -627,7 +625,6 @@ h1{font-size:1.15rem}
             <p class="bill-amount">Rp {{ number_format($tagih['total_tagihan'], 0, ',', '.') }}</p>
             <div class="bill-meta">
               <span>Periode {{ $tagih['periode'] ?: '-' }}</span>
-              <span>Urutan {{ $tagih['FURUTAN'] ?? '-' }}</span>
               <span>Bayar {{ !empty($tagih['PAIDDT']) ? \Carbon\Carbon::parse($tagih['PAIDDT'])->format('d M Y') : '-' }}</span>
             </div>
           </article>
