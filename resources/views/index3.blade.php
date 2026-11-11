@@ -312,8 +312,8 @@ h1{font-size:1.15rem}
       <div class="section-title">Informasi akun</div>
       <div class="form-grid">
         <div class="field">
-          <label>Nomor virtual account <em>*</em></label>
-          <input type="text" name="no_cust" id="noCust" inputmode="numeric" autocomplete="username" placeholder="797766xxx" value="{{ old('no_cust', $va ?? '') }}" required>
+          <label>NIS / Nomor Induk Siswa <em>*</em></label>
+          <input type="text" name="no_cust" id="noCust" inputmode="numeric" autocomplete="username" placeholder="Masukkan NIS" value="{{ old('no_cust', $va ?? '') }}" required>
         </div>
         <div class="field">
           <label>Password <em>*</em></label>
@@ -405,7 +405,7 @@ h1{font-size:1.15rem}
             $vaClose89 = $result['data']['va_close_payment'] ?? \App\Http\Controllers\TagihanController::formatClosePaymentVa($nocustVa);
             $vaOpen90 = $result['data']['va_number'] ?? \App\Http\Controllers\TagihanController::formatNova($nocustVa);
           @endphp
-          <div class="sf"><label>No. VA 797789 Close Payment - tagihan SPP</label><p>{{ $vaClose89 }}</p></div>
+          <div class="sf"><label>No. VA 797789 Full Payment - tagihan SPP</label><p>{{ $vaClose89 }}</p></div>
           <div class="sf"><label>No. VA 797790 Open Payment - tagihan DU</label><p>{{ $vaOpen90 }}</p></div>
           <div class="sf"><label>Saldo VA 797790 Open Payment</label><p>Rp {{ number_format($result['data']['saldo'] ?? 0, 0, ',', '.') }}</p></div>
         </div>
@@ -763,8 +763,8 @@ h1{font-size:1.15rem}
       <form id="multiAkunForm" onsubmit="return submitTambahMultiAkun(event)">
         @csrf
         <div class="field">
-          <label>Nomor virtual account <em>*</em></label>
-          <input type="text" name="no_cust" id="maNoCust" placeholder="797766xxx" required autocomplete="username">
+          <label>NIS / Nomor Induk Siswa <em>*</em></label>
+          <input type="text" name="no_cust" id="maNoCust" placeholder="Masukkan NIS" required autocomplete="username">
         </div>
         <div class="field">
           <label>Password <em>*</em></label>

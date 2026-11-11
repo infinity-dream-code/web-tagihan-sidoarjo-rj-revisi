@@ -38,7 +38,7 @@ class TagihanController extends Controller
         return self::formatVaWithPrefix($nocust, '797790');
     }
 
-    /** Close Payment VA (797789) */
+    /** Full Payment VA (797789) — sebelumnya Close Payment */
     public static function formatClosePaymentVa(?string $nocust): string
     {
         return self::formatVaWithPrefix($nocust, '797789');
